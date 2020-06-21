@@ -5,21 +5,17 @@
 
 // Define Pins
 #define RESET 9
-#define BLUE1 6
+
+#define RED1 4
 #define GREEN1 3
-#define RED1 5
+#define BLUE1 2
 
-int pinNums1[3];
-int startColor1[3];
-int endColor1[3];
-int colorDeltas1[3];
-float delayTime1 = 1;
-int totalTime1 = 1;
-float elapsedTime1 = 1;
-bool lightLoopRunning = false;
-
+#define RED2 7
+#define GREEN2 6
+#define BLUE2 5
 
 SweepingLight* sweepingLight1;
+SweepingLight* sweepingLight2;
     
 void setup()
 {
@@ -29,28 +25,36 @@ void setup()
 
     // led 1
     int pinNum1[3] = {RED1, GREEN1, BLUE1};
-    sweepingLight1 = new SweepingLight(pinNum1);
+    sweepingLight1 = new SweepingLight(pinNum1, true);
 
+    // led 2
+    int pinNum2[3] = {RED2, GREEN2, BLUE2};
+    sweepingLight2 = new SweepingLight(pinNum2, true);
 }
 
 // main loop
 void loop()
 {
-    if (digitalRead(RESET) == LOW && !sweepingLight1->_lightLoopRunning)
+    if (digitalRead(RESET) == LOW && 
+        !sweepingLight1->_lightLoopRunning &&
+        !sweepingLight2->_lightLoopRunning)
     {
-        startColor1[0] = 0;
-        startColor1[1] = 0;
-        startColor1[2] = 255;
-
-        endColor1[0] = 255;
-        endColor1[1] = 0;
-        endColor1[2] = 0;
-
+        int startColor1[3] = {25, 0, 0};
+        int endColor1[3] = {0, 25, 0};
         sweepingLight1->init(startColor1, endColor1, 5000);
+
+        int startColor2[3] = {0, 25, 0};
+        int endColor2[3] = {0, 0, 25};
+        sweepingLight2->init(startColor2, endColor2, 5000);
     }
 
     if(sweepingLight1->_lightLoopRunning)
     {
         sweepingLight1->step();
+    }
+
+    if(sweepingLight2->_lightLoopRunning)
+    {
+        sweepingLight2->step();
     }
 }

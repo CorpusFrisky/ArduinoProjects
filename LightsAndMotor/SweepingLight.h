@@ -6,7 +6,7 @@
 class SweepingLight
 {
     public:
-        SweepingLight(int pinNums[]);
+        SweepingLight(int pinNums[], bool isCommonCathode);
         ~SweepingLight();
         void init(int startColor[], int endColor[], int totalTime);
         void step();
@@ -14,6 +14,8 @@ class SweepingLight
         bool _lightLoopRunning;        
     private:
         void SweepingLight::setColor(int color[]);
+
+        bool _isCommonCathode;                
         int* _pinNums;
         int* _startColor;
         int* _endColor;

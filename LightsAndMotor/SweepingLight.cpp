@@ -1,18 +1,15 @@
 #include "Arduino.h"
 #include "SweepingLight.h"
 
-SweepingLight::SweepingLight(int pinNums[])
+SweepingLight::SweepingLight(int pinNums[], bool commonCathode)
 {
     _pinNums = new int[3];
     _startColor = new int[3];
     _endColor = new int[3];
     _colorDeltas = new int[3];
     _lightLoopRunning = false;
+    _isCommonCathode = commonCathode;
 
-    //_pinNums[0] = pinNums[0];
-    //_pinNums[1] = pinNums[1];
-    //_pinNums[2] = pinNums[2];
-    
     memcpy(_pinNums, pinNums, 3*sizeof(int));
 
     pinMode(_pinNums[0], OUTPUT);
@@ -33,24 +30,35 @@ SweepingLight::~SweepingLight()
 
  void SweepingLight::init(int startColor[], int endColor[], int totalTime)
  {
-     Serial.println("init");
     _lightLoopRunning = true;    
     _totalTime = totalTime;
     _elapsedTime = 0.0;
 
-    _startColor[0] = startColor[0];
-    _startColor[1] = startColor[1];
-    _startColor[2] = startColor[2];
-    _endColor[0] = endColor[0];
-    _endColor[1] = endColor[1];
-    _endColor[2] = endColor[2];
+    if(_isCommonCathode)
+    {
+        Serial.println("test");
+        for(int i=0; i<3; i++)
+        {
+            _startColor[0] = 255 - startColor[0];
+            _startColor[1] = 255 - startColor[1];
+            _startColor[2] = 255 - startColor[2];
+            _endColor[0] = 255 - endColor[0];
+            _endColor[1] = 255 - endColor[1];
+            _endColor[2] = 255 - endColor[2];
+        }
+    }
+    else
+    {
+        memcpy(_startColor, startColor, 3*sizeof(int));
+        memcpy(_endColor, endColor, 3*sizeof(int));
+    }
 
     _colorDeltas[0] = _endColor[0] - _startColor[0];
     _colorDeltas[1] = _endColor[1] - _startColor[1];
     _colorDeltas[2] = _endColor[2] - _startColor[2];
-    int maxDelta = max(max(abs(_endColor[0] - _startColor[0]),
-                           abs(_endColor[1] - _startColor[1])),
-                           abs(_endColor[2] - _startColor[2]));
+    int maxDelta = max(max(abs(_colorDeltas[0]),
+                           abs(_colorDeltas[1])),
+                           abs(_colorDeltas[2]));
     // To stop an infinite loop
     maxDelta = max(maxDelta, 1); 
     
