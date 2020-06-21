@@ -9,9 +9,18 @@ SweepingLight::SweepingLight(int pinNums[])
     _colorDeltas = new int[3];
     _lightLoopRunning = false;
 
-    _pinNums[0] = pinNums[0];
-    _pinNums[1] = pinNums[1];
-    _pinNums[2] = pinNums[2];
+    //_pinNums[0] = pinNums[0];
+    //_pinNums[1] = pinNums[1];
+    //_pinNums[2] = pinNums[2];
+    
+    memcpy(_pinNums, pinNums, 3*sizeof(int));
+
+    pinMode(_pinNums[0], OUTPUT);
+    pinMode(_pinNums[1], OUTPUT);
+    pinMode(_pinNums[2], OUTPUT);
+    digitalWrite(_pinNums[0], HIGH);
+    digitalWrite(_pinNums[1], HIGH);
+    digitalWrite(_pinNums[2], HIGH);
 }
 
 SweepingLight::~SweepingLight()
