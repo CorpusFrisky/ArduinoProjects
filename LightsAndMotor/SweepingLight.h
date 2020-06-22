@@ -6,10 +6,10 @@
 class SweepingLight
 {
     public:
-        SweepingLight(int pinNums[], bool isCommonCathode);
+        SweepingLight(int pinNums[], const bool& isCommonCathode);
         ~SweepingLight();
-        void init(int startColor[], int endColor[], int startTimeMs, int initDelayTimeMs, int timeLitMs);
-        void step(int currentTimeMs);
+        void init(int startColor[], int endColor[], const unsigned long& startTimeMs, const unsigned long& initDelayTimeMs, const unsigned long& timeLitMs);
+        void step(const unsigned long& currentTimeMs);
         void finish();
         bool _lightLoopRunning;        
     private:
@@ -21,9 +21,9 @@ class SweepingLight
         int* _endColor;
         int* _colorDeltas;
         
-        float _startTimeMs;        
-        float _initDelayTimeMs;
-        float _timeLitMs;
+        unsigned long _startTimeMs;        
+        unsigned long _initDelayTimeMs;
+        unsigned long _timeLitMs;
 };
 
 #endif

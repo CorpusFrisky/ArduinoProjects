@@ -19,7 +19,7 @@ SweepingLight* sweepingLight2;
     
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
     //RESET switch
     pinMode(RESET, INPUT_PULLUP);
 
@@ -35,7 +35,9 @@ void setup()
 // main loop
 void loop()
 {
-    int currentTimeMs = millis();
+    unsigned long currentTime = millis();
+    //Serial.println(currentTime);
+    int currentTimeMs = (int)currentTime;
 
     if (digitalRead(RESET) == LOW && 
         !sweepingLight1->_lightLoopRunning &&

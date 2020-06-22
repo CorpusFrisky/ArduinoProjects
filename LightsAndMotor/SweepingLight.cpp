@@ -1,9 +1,8 @@
 #include "Arduino.h"
 #include "SweepingLight.h"
 
-SweepingLight::SweepingLight(int pinNums[], bool commonCathode)
+SweepingLight::SweepingLight(int pinNums[], const bool& commonCathode)
 {
-    Serial.println("constucting");
     _pinNums = new int[3];
     _startColor = new int[3];
     _endColor = new int[3];
@@ -29,7 +28,7 @@ SweepingLight::~SweepingLight()
     delete _colorDeltas;
 }
 
-void SweepingLight::init(int startColor[], int endColor[], int startTimeMs, int initDelayTimeMs, int timeLitMs)
+void SweepingLight::init(int startColor[], int endColor[], const unsigned long& startTimeMs, const unsigned long& initDelayTimeMs, const unsigned long& timeLitMs)
 {
     _lightLoopRunning = true;    
 
@@ -60,23 +59,38 @@ void SweepingLight::init(int startColor[], int endColor[], int startTimeMs, int 
     _colorDeltas[2] = _endColor[2] - _startColor[2];
 }
  
-void SweepingLight::step(int currentTimeMs)
+void SweepingLight::step(const unsigned long& currentTimeMs)
 {
     if(currentTimeMs < _startTimeMs + _initDelayTimeMs)
     {
         return;
     }
 
-    if(currentTimeMs > _startTimeMs + _initDelayTimeMs + _timeLitMs)
+    unsigned long endTimeMs = _startTimeMs + _initDelayTimeMs + _timeLitMs;
+    if(currentTimeMs > endTimeMs)
     {
         finish();
         return;
     }
 
-    int elapsedTimeLitMs = currentTimeMs - (_startTimeMs + _initDelayTimeMs);
+    // Serial.print(_startColor[0]);
+    // Serial.print(" --- ");
+    // Serial.print("currentTimeMs: ");
+    // Serial.print(currentTimeMs);
+    // Serial.print(" endTime: ");
+    // Serial.println(endTimeMs);
+
+    unsigned long elapsedTimeLitMs = currentTimeMs - (_startTimeMs + _initDelayTimeMs);
 
     int colorToSet[3];
-    float ratio = elapsedTimeLitMs/_timeLitMs;
+    float ratio = float(elapsedTimeLitMs)/float(_timeLitMs);
+    // Serial.print("ratio: ");
+    // Serial.print(ratio);
+    // Serial.print(" elapsed: ");
+    // Serial.print(elapsedTimeLitMs);
+    // Serial.print(" timeLit: ");
+    // Serial.println(_timeLitMs);
+
     colorToSet[0] = _startColor[0] + (int)(_colorDeltas[0] * ratio);
     colorToSet[1] = _startColor[1] + (int)(_colorDeltas[1] * ratio);
     colorToSet[2] = _startColor[2] + (int)(_colorDeltas[2] * ratio);
