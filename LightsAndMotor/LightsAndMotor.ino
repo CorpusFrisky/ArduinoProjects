@@ -35,26 +35,28 @@ void setup()
 // main loop
 void loop()
 {
+    int currentTimeMs = millis();
+
     if (digitalRead(RESET) == LOW && 
         !sweepingLight1->_lightLoopRunning &&
         !sweepingLight2->_lightLoopRunning)
     {
         int startColor1[3] = {25, 0, 0};
         int endColor1[3] = {0, 25, 0};
-        sweepingLight1->init(startColor1, endColor1, 5000);
+        sweepingLight1->init(startColor1, endColor1, currentTimeMs, 0, 5000);
 
         int startColor2[3] = {0, 25, 0};
         int endColor2[3] = {0, 0, 25};
-        sweepingLight2->init(startColor2, endColor2, 5000);
+        sweepingLight2->init(startColor2, endColor2, currentTimeMs, 500, 5000);
     }
 
     if(sweepingLight1->_lightLoopRunning)
     {
-        sweepingLight1->step();
+        sweepingLight1->step(currentTimeMs);
     }
 
     if(sweepingLight2->_lightLoopRunning)
     {
-        sweepingLight2->step();
+        sweepingLight2->step(currentTimeMs);
     }
 }

@@ -8,21 +8,22 @@ class SweepingLight
     public:
         SweepingLight(int pinNums[], bool isCommonCathode);
         ~SweepingLight();
-        void init(int startColor[], int endColor[], int totalTime);
-        void step();
+        void init(int startColor[], int endColor[], int startTimeMs, int initDelayTimeMs, int timeLitMs);
+        void step(int currentTimeMs);
         void finish();
         bool _lightLoopRunning;        
     private:
-        void SweepingLight::setColor(int color[]);
+        void setColor(int color[]);
 
         bool _isCommonCathode;                
         int* _pinNums;
         int* _startColor;
         int* _endColor;
-        float _totalTime;
         int* _colorDeltas;
-        float _delayTime;
-        float _elapsedTime;
+        
+        float _startTimeMs;        
+        float _initDelayTimeMs;
+        float _timeLitMs;
 };
 
 #endif
