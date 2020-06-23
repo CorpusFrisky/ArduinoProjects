@@ -6,6 +6,7 @@
 
 
 // Define Pins
+#define IR_DETECTOR A0
 #define RESET 12
 #define SERVO 13
 
@@ -40,6 +41,9 @@ void setup()
     //RESET switch
     pinMode(RESET, INPUT_PULLUP);
 
+    //IR_DETECTOR
+    pinMode(IR_DETECTOR, INPUT);
+
     // led 1
     int pinNum1[3] = {RED1, GREEN1, BLUE1};
     sweepingLight1 = new SweepingLight(pinNum1, true);
@@ -63,7 +67,9 @@ void loop()
     //Serial.println(currentTime);
     int currentTimeMs = (int)currentTime;
 
-    if (digitalRead(RESET) == LOW && 
+    if (
+        //digitalRead(RESET) == LOW && 
+        digitalRead(IR_DETECTOR) == LOW &&
         !sweepingLight1->_lightLoopRunning &&
         !sweepingLight2->_lightLoopRunning)
     {
