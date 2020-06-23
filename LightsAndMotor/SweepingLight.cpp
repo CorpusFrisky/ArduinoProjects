@@ -73,17 +73,13 @@ void SweepingLight::step(const unsigned long& currentTimeMs)
         return;
     }
 
-    // Serial.print(_startColor[0]);
-    // Serial.print(" --- ");
-    // Serial.print("currentTimeMs: ");
-    // Serial.print(currentTimeMs);
-    // Serial.print(" endTime: ");
-    // Serial.println(endTimeMs);
-
     unsigned long elapsedTimeLitMs = currentTimeMs - (_startTimeMs + _initDelayTimeMs);
 
     int colorToSet[3];
     float ratio = float(elapsedTimeLitMs)/float(_timeLitMs);
+
+    // Serial.print(_startColor[0]);
+    // Serial.print(" --- ");
     // Serial.print("ratio: ");
     // Serial.print(ratio);
     // Serial.print(" elapsed: ");

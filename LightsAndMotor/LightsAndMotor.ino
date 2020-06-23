@@ -2,9 +2,12 @@
 //2016.12.8
 
 #include "SweepingLight.h"
+#include <Servo.h>
+
 
 // Define Pins
-#define RESET 9
+#define RESET 12
+#define SERVO 13
 
 #define RED1 4
 #define GREEN1 3
@@ -14,8 +17,22 @@
 #define GREEN2 6
 #define BLUE2 5
 
+#define RED3 10
+#define GREEN3 9
+#define BLUE3 8
+
 SweepingLight* sweepingLight1;
 SweepingLight* sweepingLight2;
+SweepingLight* sweepingLight3;
+Servo servo;
+
+int _servoPos = 0;
+unsigned long _servoStartTimeMs = 0;
+unsigned long _servoMoveEndTimeMs = 0;
+unsigned long _servoMoveTimeMs = 0;
+unsigned long _servoResetTimeMs = 0;
+unsigned long _servoResetEndTimeMs = 0;
+bool _isServoMoving = false;
     
 void setup()
 {
@@ -30,6 +47,13 @@ void setup()
     // led 2
     int pinNum2[3] = {RED2, GREEN2, BLUE2};
     sweepingLight2 = new SweepingLight(pinNum2, true);
+
+    // led 3
+    int pinNum3[3] = {RED3, GREEN3, BLUE3};
+    sweepingLight3 = new SweepingLight(pinNum3, true);
+
+    servo.attach(SERVO);
+    servo.write(_servoPos);
 }
 
 // main loop
@@ -44,12 +68,18 @@ void loop()
         !sweepingLight2->_lightLoopRunning)
     {
         int startColor1[3] = {25, 0, 0};
-        int endColor1[3] = {0, 25, 0};
+        int endColor1[3] = {0, 0, 25};
         sweepingLight1->init(startColor1, endColor1, currentTimeMs, 0, 5000);
 
-        int startColor2[3] = {0, 25, 0};
+        int startColor2[3] = {25, 0, 0};
         int endColor2[3] = {0, 0, 25};
-        sweepingLight2->init(startColor2, endColor2, currentTimeMs, 500, 5000);
+        sweepingLight2->init(startColor2, endColor2, currentTimeMs, 1000, 5000);
+
+        int startColor3[3] = {25, 0, 0};
+        int endColor3[3] = {0, 0, 25};
+        sweepingLight3->init(startColor3, endColor3, currentTimeMs, 2000, 5000);
+
+        servoInit(currentTime, 7000, 2000);
     }
 
     if(sweepingLight1->_lightLoopRunning)
@@ -61,4 +91,46 @@ void loop()
     {
         sweepingLight2->step(currentTimeMs);
     }
+
+    if(sweepingLight3->_lightLoopRunning)
+    {
+        sweepingLight3->step(currentTimeMs);
+    }
+
+    if(_isServoMoving)
+    {
+        servoStep(currentTimeMs);
+    }
+}
+
+void servoInit(unsigned long currentTimeMs, unsigned long timeToMove, unsigned long servoResetTimeMs)
+{
+    _servoStartTimeMs = currentTimeMs;
+    _servoMoveEndTimeMs = currentTimeMs + timeToMove;
+    _servoMoveTimeMs = timeToMove;
+    _servoResetTimeMs = servoResetTimeMs;
+    _servoResetEndTimeMs = _servoMoveEndTimeMs + _servoResetTimeMs;
+    _isServoMoving = true;
+}
+
+void servoStep(unsigned long currentTimeMs)
+{
+    if(currentTimeMs > _servoResetEndTimeMs)
+    {
+        servo.write(0);
+        _isServoMoving = false;
+        return;
+    }
+
+    if(currentTimeMs < _servoMoveEndTimeMs)
+    {
+        _servoPos = (int)(180.0 * (float(currentTimeMs) - float(_servoStartTimeMs)) / _servoMoveTimeMs);
+    }
+    else
+    {
+        _servoPos = 180 - (int)(180.0 * (float(currentTimeMs) - float(_servoMoveEndTimeMs)) / _servoResetTimeMs);
+    }
+
+    Serial.println(_servoPos);
+    servo.write(_servoPos);
 }
