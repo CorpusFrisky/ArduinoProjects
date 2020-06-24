@@ -63,9 +63,8 @@ void setup()
 // main loop
 void loop()
 {
-    unsigned long currentTime = millis();
+    unsigned long currentTimeMs = millis();
     //Serial.println(currentTime);
-    int currentTimeMs = (int)currentTime;
 
     if (
         //digitalRead(RESET) == LOW && 
@@ -85,7 +84,7 @@ void loop()
         int endColor3[3] = {0, 0, 25};
         sweepingLight3->init(startColor3, endColor3, currentTimeMs, 2000, 5000);
 
-        servoInit(currentTime, 7000, 2000);
+        servoInit(currentTimeMs, 7000, 2000);
     }
 
     if(sweepingLight1->_lightLoopRunning)
@@ -121,6 +120,14 @@ void servoInit(unsigned long currentTimeMs, unsigned long timeToMove, unsigned l
 
 void servoStep(unsigned long currentTimeMs)
 {
+    Serial.print(" currentTimeMs: ");
+    Serial.print(currentTimeMs);
+    Serial.print(" _servoStartTimeMs: ");
+    Serial.println(_servoStartTimeMs);
+    Serial.print(" _servoMoveEndTimeMs: ");
+    Serial.println(_servoMoveEndTimeMs);
+     Serial.print(" _servoResetTimeMs: ");
+    Serial.println(_servoResetTimeMs);
     if(currentTimeMs > _servoResetEndTimeMs)
     {
         servo.write(0);
