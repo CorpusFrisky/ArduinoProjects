@@ -74,15 +74,24 @@ void loop()
     {
         int startColor1[3] = {25, 0, 0};
         int endColor1[3] = {0, 0, 25};
-        sweepingLight1->init(startColor1, endColor1, currentTimeMs, 0, 5000);
+        SweepingLightPlotPoint* points1[2];
+        points1[0] = new SweepingLightPlotPoint(startColor1, 0);
+        points1[1] = new SweepingLightPlotPoint(endColor1, 5000);
+        sweepingLight1->init(points1, 2, currentTimeMs, 0);
 
         int startColor2[3] = {25, 0, 0};
         int endColor2[3] = {0, 0, 25};
-        sweepingLight2->init(startColor2, endColor2, currentTimeMs, 1000, 5000);
+        SweepingLightPlotPoint* points2[2];        
+        points2[0] = new SweepingLightPlotPoint(startColor2, 0);
+        points2[1] = new SweepingLightPlotPoint(endColor2, 5000);
+        sweepingLight1->init(points2, 2, currentTimeMs, 1000);
 
         int startColor3[3] = {25, 0, 0};
         int endColor3[3] = {0, 0, 25};
-        sweepingLight3->init(startColor3, endColor3, currentTimeMs, 2000, 5000);
+        SweepingLightPlotPoint* points3[2];        
+        points3[0] = new SweepingLightPlotPoint(startColor3, 0);
+        points3[1] = new SweepingLightPlotPoint(endColor3, 5000);
+        sweepingLight1->init(points3, 2, currentTimeMs, 2000);
 
         servoInit(currentTimeMs, 7000, 2000);
     }

@@ -4,8 +4,7 @@
 SweepingLight::SweepingLight(int pinNums[], const bool& commonCathode)
 {
     _pinNums = new int[3];
-    _startColor = new int[3];
-    _endColor = new int[3];
+    _currentStartPlotPointIndex = 0;
     _colorDeltas = new int[3];
     _lightLoopRunning = false;
     _isCommonCathode = commonCathode;
@@ -23,40 +22,51 @@ SweepingLight::SweepingLight(int pinNums[], const bool& commonCathode)
 SweepingLight::~SweepingLight()
 {
     delete _pinNums;
-    delete _startColor;
-    delete _endColor;
     delete _colorDeltas;
+    if(_plotPoints)
+    {
+        delete _plotPoints;
+    }
 }
 
-void SweepingLight::init(int startColor[], int endColor[], const unsigned long& startTimeMs, const unsigned long& initDelayTimeMs, const unsigned long& timeLitMs)
+void SweepingLight::init(SweepingLightPlotPoint* plotPointArray[], int plotPointArraySize, const unsigned long& startTimeMs, const unsigned long& initDelayTimeMs)
 {
+    if(plotPointArraySize < 2)
+    {
+        return;
+    }
+
     _lightLoopRunning = true;    
+
+    memcpy(_plotPoints, plotPointArray, plotPointArraySize * sizeof(SweepingLightPlotPoint*));
+    _numPlotPoints = plotPointArraySize;
+    _currentStartPlotPointIndex = 0;
 
     _startTimeMs = startTimeMs;
     _initDelayTimeMs = initDelayTimeMs;
-    _timeLitMs = timeLitMs;
 
     if(_isCommonCathode)
     {
-        for(int i=0; i<3; i++)
+        for(int i=0; i<plotPointArraySize; i++)
         {
-            _startColor[0] = 255 - startColor[0];
-            _startColor[1] = 255 - startColor[1];
-            _startColor[2] = 255 - startColor[2];
-            _endColor[0] = 255 - endColor[0];
-            _endColor[1] = 255 - endColor[1];
-            _endColor[2] = 255 - endColor[2];
+            for(int j=0; j<3; j++)
+            {
+                _plotPoints[i]->_color[0] = 255 -  _plotPoints[i]->_color[0];
+                _plotPoints[i]->_color[1] = 255 -  _plotPoints[i]->_color[1];
+                _plotPoints[i]->_color[2] = 255 -  _plotPoints[i]->_color[2];
+            }
         }
     }
-    else
-    {
-        memcpy(_startColor, startColor, 3*sizeof(int));
-        memcpy(_endColor, endColor, 3*sizeof(int));
-    }
 
-    _colorDeltas[0] = _endColor[0] - _startColor[0];
-    _colorDeltas[1] = _endColor[1] - _startColor[1];
-    _colorDeltas[2] = _endColor[2] - _startColor[2];
+    setDeltasAndPlotLineLengthFromStartPlotPointIndex(_currentStartPlotPointIndex);
+}
+
+void SweepingLight::setDeltasAndPlotLineLengthFromStartPlotPointIndex(int index)
+{
+    _lengthOfCurrentPlotLine = _plotPoints[index+1]->_offset - _plotPoints[index]->_offset;
+    _colorDeltas[0] = _plotPoints[index+1]->_color[0] - _plotPoints[index]->_color[0];
+    _colorDeltas[1] = _plotPoints[index+1]->_color[1] - _plotPoints[index]->_color[1];
+    _colorDeltas[2] = _plotPoints[index+1]->_color[2] - _plotPoints[index]->_color[2];
 }
  
 void SweepingLight::step(const unsigned long& currentTimeMs)
@@ -66,17 +76,25 @@ void SweepingLight::step(const unsigned long& currentTimeMs)
         return;
     }
 
-    unsigned long endTimeMs = _startTimeMs + _initDelayTimeMs + _timeLitMs;
-    if(currentTimeMs > endTimeMs)
+    unsigned long plotEndTimeMs = _startTimeMs + _initDelayTimeMs + _lengthOfCurrentPlotLine;
+    if(currentTimeMs > plotEndTimeMs)
     {
-        finish();
-        return;
+        _currentStartPlotPointIndex++;
+        if(_currentStartPlotPointIndex < _numPlotPoints)
+        {
+            setDeltasAndPlotLineLengthFromStartPlotPointIndex(_currentStartPlotPointIndex);
+        }
+        else
+        {
+            finish();
+            return;
+        }
     }
 
-    unsigned long elapsedTimeLitMs = currentTimeMs - (_startTimeMs + _initDelayTimeMs);
+    unsigned long elapsedTimeOnPlotLineMs = currentTimeMs - (_startTimeMs + _plotPoints[_currentStartPlotPointIndex]->_offset);
 
     int colorToSet[3];
-    float ratio = float(elapsedTimeLitMs)/float(_timeLitMs);
+    float ratio = float(elapsedTimeOnPlotLineMs)/float(_lengthOfCurrentPlotLine);
 
     // Serial.print(_startColor[0]);
     // Serial.print(" --- ");
@@ -87,9 +105,9 @@ void SweepingLight::step(const unsigned long& currentTimeMs)
     // Serial.print(" timeLit: ");
     // Serial.println(_timeLitMs);
 
-    colorToSet[0] = _startColor[0] + (int)(_colorDeltas[0] * ratio);
-    colorToSet[1] = _startColor[1] + (int)(_colorDeltas[1] * ratio);
-    colorToSet[2] = _startColor[2] + (int)(_colorDeltas[2] * ratio);
+    colorToSet[0] = _plotPoints[_currentStartPlotPointIndex]->_color[0] + (int)(_colorDeltas[0] * ratio);
+    colorToSet[1] = _plotPoints[_currentStartPlotPointIndex]->_color[1] + (int)(_colorDeltas[1] * ratio);
+    colorToSet[2] = _plotPoints[_currentStartPlotPointIndex]->_color[2] + (int)(_colorDeltas[2] * ratio);
     setColor(colorToSet);
 }
 
