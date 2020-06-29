@@ -8,7 +8,7 @@
 // Define Pins
 #define IR_DETECTOR A0
 #define RESET 12
-#define SERVO 13
+#define SERVO A1
 
 #define RED1 4
 #define GREEN1 3
@@ -22,9 +22,14 @@
 #define GREEN3 9
 #define BLUE3 8
 
+#define RED4 13
+#define GREEN4 12
+#define BLUE4 11
+
 SweepingLight* sweepingLight1;
 SweepingLight* sweepingLight2;
 SweepingLight* sweepingLight3;
+SweepingLight* sweepingLight4;
 Servo servo;
 
 int _servoPos = 0;
@@ -56,6 +61,10 @@ void setup()
     int pinNum3[3] = {RED3, GREEN3, BLUE3};
     sweepingLight3 = new SweepingLight(pinNum3, true);
 
+    // led 4
+    int pinNum4[4] = {RED4, GREEN4, BLUE4};
+    sweepingLight4 = new SweepingLight(pinNum4, true);
+
     servo.attach(SERVO);
     servo.write(_servoPos);
 }
@@ -67,24 +76,31 @@ void loop()
     //Serial.println(currentTime);
 
     if (
-        //digitalRead(RESET) == LOW && 
-        digitalRead(IR_DETECTOR) == LOW &&
+        digitalRead(RESET) == LOW && 
+        //digitalRead(IR_DETECTOR) == LOW &&
         !sweepingLight1->_lightLoopRunning &&
-        !sweepingLight2->_lightLoopRunning)
+        !sweepingLight2->_lightLoopRunning &&
+        !sweepingLight3->_lightLoopRunning &&
+        !sweepingLight4->_lightLoopRunning &&
+        !_isServoMoving)
     {
         int startColor1[3] = {25, 0, 0};
         int endColor1[3] = {0, 0, 25};
         sweepingLight1->init(startColor1, endColor1, currentTimeMs, 0, 5000);
 
-        int startColor2[3] = {25, 0, 0};
-        int endColor2[3] = {0, 0, 25};
+        int startColor2[3] = {0, 0, 25};
+        int endColor2[3] = {25, 0, 25};
         sweepingLight2->init(startColor2, endColor2, currentTimeMs, 1000, 5000);
 
-        int startColor3[3] = {25, 0, 0};
+        int startColor3[3] = {25, 0, 25};
         int endColor3[3] = {0, 0, 25};
         sweepingLight3->init(startColor3, endColor3, currentTimeMs, 2000, 5000);
 
-        servoInit(currentTimeMs, 7000, 2000);
+        int startColor4[3] = {0, 0, 25};
+        int endColor4[3] = {50, 25, 25};
+        sweepingLight4->init(startColor4, endColor4, currentTimeMs, 3000, 5000);
+
+        servoInit(currentTimeMs, 8000, 3000);
     }
 
     if(sweepingLight1->_lightLoopRunning)
@@ -100,6 +116,11 @@ void loop()
     if(sweepingLight3->_lightLoopRunning)
     {
         sweepingLight3->step(currentTimeMs);
+    }
+
+    if(sweepingLight4->_lightLoopRunning)
+    {
+        sweepingLight4->step(currentTimeMs);
     }
 
     if(_isServoMoving)
