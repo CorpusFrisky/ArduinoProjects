@@ -40,7 +40,8 @@ class SweepingLight
         
         unsigned long _startTimeMs;        
         unsigned long _initDelayTimeMs;
-        unsigned long _lengthOfCurrentPlotLine;
+        unsigned long _lengthOfCurrentPlotLineMs;
+        unsigned long _endTimeOfCurrentPlotLineMs;
 };
 
 #endif

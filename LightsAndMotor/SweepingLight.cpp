@@ -44,6 +44,7 @@ void SweepingLight::init(SweepingLightPlotPoint* plotPointArray[], int plotPoint
 
     _startTimeMs = startTimeMs;
     _initDelayTimeMs = initDelayTimeMs;
+    _endTimeOfCurrentPlotLineMs = startTimeMs + initDelayTimeMs;
 
     if(_isCommonCathode)
     {
@@ -63,10 +64,26 @@ void SweepingLight::init(SweepingLightPlotPoint* plotPointArray[], int plotPoint
 
 void SweepingLight::setDeltasAndPlotLineLengthFromStartPlotPointIndex(int index)
 {
-    _lengthOfCurrentPlotLine = _plotPoints[index+1]->_offset - _plotPoints[index]->_offset;
+    Serial.print("setting for index ");
+    Serial.println(index);
+
+    Serial.print("_plotPoints[index+1]->_offset: ");
+    Serial.print(_plotPoints[index+1]->_offset);
+    Serial.print("_plotPoints[index]->_offset: ");
+    Serial.print(_plotPoints[index]->_offset);
+
+    _lengthOfCurrentPlotLineMs = _plotPoints[index+1]->_offset - _plotPoints[index]->_offset;
+    _endTimeOfCurrentPlotLineMs += _lengthOfCurrentPlotLineMs;
     _colorDeltas[0] = _plotPoints[index+1]->_color[0] - _plotPoints[index]->_color[0];
     _colorDeltas[1] = _plotPoints[index+1]->_color[1] - _plotPoints[index]->_color[1];
     _colorDeltas[2] = _plotPoints[index+1]->_color[2] - _plotPoints[index]->_color[2];
+
+    Serial.print("_lengthOfCurrentPlotLineMs: ");
+    Serial.print(_lengthOfCurrentPlotLineMs);
+    Serial.print(" _plotPoints[index+1]->_color[0]: ");
+    Serial.print(_plotPoints[index+1]->_color[0]);
+    Serial.print(" _plotPoints[index]->_color[0]: ");
+    Serial.println(_plotPoints[index]->_color[0]);
 }
  
 void SweepingLight::step(const unsigned long& currentTimeMs)
@@ -75,12 +92,10 @@ void SweepingLight::step(const unsigned long& currentTimeMs)
     {
         return;
     }
-
-    unsigned long plotEndTimeMs = _startTimeMs + _initDelayTimeMs + _lengthOfCurrentPlotLine;
-    if(currentTimeMs > plotEndTimeMs)
+    if(currentTimeMs > _endTimeOfCurrentPlotLineMs)
     {
         _currentStartPlotPointIndex++;
-        if(_currentStartPlotPointIndex < _numPlotPoints)
+        if(_currentStartPlotPointIndex < _numPlotPoints - 1)
         {
             setDeltasAndPlotLineLengthFromStartPlotPointIndex(_currentStartPlotPointIndex);
         }
@@ -94,20 +109,23 @@ void SweepingLight::step(const unsigned long& currentTimeMs)
     unsigned long elapsedTimeOnPlotLineMs = currentTimeMs - (_startTimeMs + _plotPoints[_currentStartPlotPointIndex]->_offset);
 
     int colorToSet[3];
-    float ratio = float(elapsedTimeOnPlotLineMs)/float(_lengthOfCurrentPlotLine);
+    float ratio = float(elapsedTimeOnPlotLineMs)/float(_lengthOfCurrentPlotLineMs);
 
-    // Serial.print(_startColor[0]);
+    // Serial.print("_color[0]");
+    // Serial.print(_plotPoints[_currentStartPlotPointIndex]->_color[0]);
     // Serial.print(" --- ");
     // Serial.print("ratio: ");
     // Serial.print(ratio);
-    // Serial.print(" elapsed: ");
-    // Serial.print(elapsedTimeLitMs);
-    // Serial.print(" timeLit: ");
-    // Serial.println(_timeLitMs);
+    // Serial.print(" _colorDeltas[0]: ");
+    // Serial.print(_colorDeltas[0]);
+   
 
     colorToSet[0] = _plotPoints[_currentStartPlotPointIndex]->_color[0] + (int)(_colorDeltas[0] * ratio);
     colorToSet[1] = _plotPoints[_currentStartPlotPointIndex]->_color[1] + (int)(_colorDeltas[1] * ratio);
     colorToSet[2] = _plotPoints[_currentStartPlotPointIndex]->_color[2] + (int)(_colorDeltas[2] * ratio);
+
+    //  Serial.print("colorToSet[0]: ");
+    // Serial.println(colorToSet[0]);
     setColor(colorToSet);
 }
 

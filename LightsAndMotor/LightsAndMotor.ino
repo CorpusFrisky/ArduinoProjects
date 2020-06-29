@@ -67,31 +67,19 @@ void loop()
     //Serial.println(currentTime);
 
     if (
-        //digitalRead(RESET) == LOW && 
-        digitalRead(IR_DETECTOR) == LOW &&
-        !sweepingLight1->_lightLoopRunning &&
-        !sweepingLight2->_lightLoopRunning)
+        digitalRead(RESET) == LOW && 
+        //digitalRead(IR_DETECTOR) == LOW &&
+        !sweepingLight1->_lightLoopRunning)
     {
-        int startColor1[3] = {25, 0, 0};
-        int endColor1[3] = {0, 0, 25};
+        Serial.println("Sweep starting");
+        int color1[3] = {25, 0, 0};
+        int color2[3] = {0, 0, 25};
+        int color3[3] = {0, 25, 0};
         SweepingLightPlotPoint* points1[2];
-        points1[0] = new SweepingLightPlotPoint(startColor1, 0);
-        points1[1] = new SweepingLightPlotPoint(endColor1, 5000);
-        sweepingLight1->init(points1, 2, currentTimeMs, 0);
-
-        int startColor2[3] = {25, 0, 0};
-        int endColor2[3] = {0, 0, 25};
-        SweepingLightPlotPoint* points2[2];        
-        points2[0] = new SweepingLightPlotPoint(startColor2, 0);
-        points2[1] = new SweepingLightPlotPoint(endColor2, 5000);
-        sweepingLight1->init(points2, 2, currentTimeMs, 1000);
-
-        int startColor3[3] = {25, 0, 0};
-        int endColor3[3] = {0, 0, 25};
-        SweepingLightPlotPoint* points3[2];        
-        points3[0] = new SweepingLightPlotPoint(startColor3, 0);
-        points3[1] = new SweepingLightPlotPoint(endColor3, 5000);
-        sweepingLight1->init(points3, 2, currentTimeMs, 2000);
+        points1[0] = new SweepingLightPlotPoint(color1, 0);
+        points1[1] = new SweepingLightPlotPoint(color2, 5000);
+        points1[2] = new SweepingLightPlotPoint(color3, 7000);
+        sweepingLight1->init(points1, 3, currentTimeMs, 0);
 
         servoInit(currentTimeMs, 7000, 2000);
     }
@@ -129,14 +117,6 @@ void servoInit(unsigned long currentTimeMs, unsigned long timeToMove, unsigned l
 
 void servoStep(unsigned long currentTimeMs)
 {
-    Serial.print(" currentTimeMs: ");
-    Serial.print(currentTimeMs);
-    Serial.print(" _servoStartTimeMs: ");
-    Serial.println(_servoStartTimeMs);
-    Serial.print(" _servoMoveEndTimeMs: ");
-    Serial.println(_servoMoveEndTimeMs);
-     Serial.print(" _servoResetTimeMs: ");
-    Serial.println(_servoResetTimeMs);
     if(currentTimeMs > _servoResetEndTimeMs)
     {
         servo.write(0);
@@ -153,6 +133,5 @@ void servoStep(unsigned long currentTimeMs)
         _servoPos = 180 - (int)(180.0 * (float(currentTimeMs) - float(_servoMoveEndTimeMs)) / _servoResetTimeMs);
     }
 
-    Serial.println(_servoPos);
     servo.write(_servoPos);
 }
