@@ -76,8 +76,8 @@ void loop()
     //Serial.println(currentTime);
 
     if (
-        digitalRead(RESET) == LOW && 
-        //digitalRead(IR_DETECTOR) == LOW &&
+        //digitalRead(RESET) == LOW && 
+        digitalRead(IR_DETECTOR) == LOW &&
         !sweepingLight1->_lightLoopRunning &&
         !sweepingLight2->_lightLoopRunning &&
         !sweepingLight3->_lightLoopRunning &&
